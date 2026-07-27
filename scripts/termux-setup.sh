@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
-set -euo pipefail
+set -uo pipefail
 
 REPO_URL="https://github.com/joshuamaster9/Bounty-Hunters.git"
 INSTALL_DIR="$HOME/Bounty-Hunters"
@@ -13,29 +13,29 @@ if [ ! -d "/data/data/com.termux" ]; then
     exit 1
 fi
 
+FAILED_PKGS=""
+
+install_pkg() {
+    local label="$1"; shift
+    info "Installing $label..."
+    if ! pkg install -y "$@"; then
+        for p in "$@"; do
+            FAILED_PKGS="$FAILED_PKGS $p"
+        done
+        warn "Some packages in '$label' failed — continuing anyway."
+    fi
+}
+
 info "Updating Termux package lists..."
 pkg update -y && pkg upgrade -y
 
-info "Installing core tools..."
-pkg install -y git openssh curl wget
-
-info "Installing Python..."
-pkg install -y python python-pip
-
-info "Installing Node.js..."
-pkg install -y nodejs-lts
-
-info "Installing C/C++ toolchain..."
-pkg install -y clang make openssl openssl-tool
-
-info "Installing Go..."
-pkg install -y golang
-
-info "Installing Rust..."
-pkg install -y rust
-
-info "Installing additional utilities..."
-pkg install -y jq nmap-ncat termux-api
+install_pkg "core tools"        git openssh curl wget
+install_pkg "Python"            python python-pip
+install_pkg "Node.js"           nodejs-lts
+install_pkg "C/C++ toolchain"   clang make openssl openssl-tool
+install_pkg "Go"                golang
+install_pkg "Rust"              rust
+install_pkg "utilities"         jq nmap termux-api
 
 info "Setting up storage access..."
 if [ ! -d "$HOME/storage" ]; then
@@ -78,6 +78,11 @@ printf '%-14s %s\n' "go"      "$(go version 2>/dev/null | cut -d' ' -f3 | sed 's
 printf '%-14s %s\n' "rustc"   "$(rustc --version 2>/dev/null | cut -d' ' -f2 || echo 'not found')"
 printf '%-14s %s\n' "openssl" "$(openssl version 2>/dev/null | cut -d' ' -f2 || echo 'not found')"
 echo ""
+
+if [ -n "$FAILED_PKGS" ]; then
+    warn "These packages failed to install:$FAILED_PKGS"
+    warn "Try installing them manually: pkg install <name>"
+fi
 
 info "Setup complete!"
 info "Project location: $INSTALL_DIR"
