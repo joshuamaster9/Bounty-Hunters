@@ -60,9 +60,6 @@ else
     git clone "$REPO_URL" "$INSTALL_DIR"
 fi
 
-info "Installing Anthropic Python SDK..."
-pip install anthropic || warn "Anthropic SDK install failed — try: pip install anthropic"
-
 info "Installing Python dependencies..."
 pip install --upgrade pip
 if [ -f "$INSTALL_DIR/requirements.txt" ]; then
@@ -80,7 +77,7 @@ printf '%-14s %s\n' "clang"   "$(clang --version 2>/dev/null | head -1 | sed 's/
 printf '%-14s %s\n' "go"      "$(go version 2>/dev/null | cut -d' ' -f3 | sed 's/go//' || echo 'not found')"
 printf '%-14s %s\n' "rustc"   "$(rustc --version 2>/dev/null | cut -d' ' -f2 || echo 'not found')"
 printf '%-14s %s\n' "openssl" "$(openssl version 2>/dev/null | cut -d' ' -f2 || echo 'not found')"
-printf '%-14s %s\n' "anthropic" "$(pip show anthropic 2>/dev/null | grep Version | cut -d' ' -f2 || echo 'not found')"
+printf '%-14s %s\n' "claude-t"  "$([ -x "$PREFIX/bin/claude-t" ] && echo 'installed' || echo 'run: bash scripts/install-claude-termux.sh')"
 echo ""
 
 if [ -n "$FAILED_PKGS" ]; then
@@ -99,6 +96,8 @@ echo "  cd go && go build ./...                 # Build Go module"
 echo "  cd rust && rustc tls_session.rs         # Build Rust module"
 echo "  cd c && clang -lssl -lcrypto tls_cert_validator.c -o validator"
 echo ""
-echo "Claude AI (no native CLI on Termux):"
-echo "  Use Claude Code on the web: claude.ai/code"
-echo "  Or use the Python SDK:  python -c \"import anthropic; ...\""
+echo "Local AI (soberano — no API keys):"
+echo "  bash scripts/install-claude-termux.sh    # install claude-t"
+echo "  pkg install ollama && ollama serve &      # start model server"
+echo "  ollama pull qwen3:1.7b                   # get a model"
+echo "  claude-t                                  # chat"
