@@ -60,6 +60,13 @@ else
     git clone "$REPO_URL" "$INSTALL_DIR"
 fi
 
+info "Installing Claude Code CLI..."
+if ! command -v claude > /dev/null 2>&1; then
+    npm install -g @anthropic-ai/claude-code || warn "Claude Code install failed — try: npm install -g @anthropic-ai/claude-code"
+else
+    info "Claude Code already installed."
+fi
+
 info "Installing Python dependencies..."
 pip install --upgrade pip
 if [ -f "$INSTALL_DIR/requirements.txt" ]; then
@@ -77,6 +84,7 @@ printf '%-14s %s\n' "clang"   "$(clang --version 2>/dev/null | head -1 | sed 's/
 printf '%-14s %s\n' "go"      "$(go version 2>/dev/null | cut -d' ' -f3 | sed 's/go//' || echo 'not found')"
 printf '%-14s %s\n' "rustc"   "$(rustc --version 2>/dev/null | cut -d' ' -f2 || echo 'not found')"
 printf '%-14s %s\n' "openssl" "$(openssl version 2>/dev/null | cut -d' ' -f2 || echo 'not found')"
+printf '%-14s %s\n' "claude"  "$(claude --version 2>/dev/null || echo 'not found')"
 echo ""
 
 if [ -n "$FAILED_PKGS" ]; then
@@ -89,8 +97,9 @@ info "Project location: $INSTALL_DIR"
 echo ""
 echo "Quick start:"
 echo "  cd $INSTALL_DIR"
-echo "  python python/tls_handshake.py        # Python TLS module"
+echo "  claude                                  # Start Claude Code"
+echo "  python python/tls_handshake.py          # Python TLS module"
 echo "  node javascript/tls_handshake_client.js # JS TLS client"
-echo "  cd go && go build ./...                # Build Go module"
-echo "  cd rust && rustc tls_session.rs        # Build Rust module"
-echo "  cd c && clang -lssl -lcrypto tls_cert_validator.c -o validator  # Build C module"
+echo "  cd go && go build ./...                 # Build Go module"
+echo "  cd rust && rustc tls_session.rs         # Build Rust module"
+echo "  cd c && clang -lssl -lcrypto tls_cert_validator.c -o validator"
